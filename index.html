@@ -4,30 +4,202 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>我的第一个AI网页</title>
+  <title>我的待办清单</title>
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      font-family: sans-serif;
-      background: #eef4ff;
-      text-align: center;
-      padding: 80px 20px;
+      font-family: -apple-system, BlinkMacSystemFont,
+                   "Microsoft YaHei", sans-serif;
+      background: #edf3ff;
+      margin: 0;
+      padding: 45px 16px;
+      color: #263044;
     }
+
+    .app {
+      max-width: 520px;
+      margin: auto;
+      background: white;
+      padding: 28px;
+      border-radius: 22px;
+      box-shadow: 0 10px 35px #193b7015;
+    }
+
+    h1 { margin: 0 0 8px; }
+    .subtitle { color: #8490a4; }
+
+    .add-row {
+      display: flex;
+      gap: 8px;
+      margin: 28px 0 20px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid #dce3ef;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+
     button {
-      background: #3478f6;
-      color: white;
-      padding: 14px 25px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
+      padding: 11px 16px;
       cursor: pointer;
+    }
+
+    .add {
+      background: #3979f6;
+      color: white;
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 3px;
+      border-bottom: 1px solid #edf0f5;
+    }
+
+    .task input { flex: none; }
+
+    .task span {
+      flex: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .done {
+      text-decoration: line-through;
+      color: #a5adbb;
+    }
+
+    .delete {
+      background: #fff0f0;
+      color: #e04b4b;
+    }
+
+    .stats {
+      margin-top: 24px;
+      color: #617089;
+      font-size: 14px;
+    }
+
+    .empty {
+      color: #98a3b6;
+      text-align: center;
+      padding: 20px;
     }
   </style>
 </head>
+
 <body>
-  <h1>你好！这是我的第一个AI项目</h1>
-  <p>我正在学习使用 GitHub 开发软件。</p>
-  <button onclick="alert('恭喜！按钮运行成功！')">
-    点击体验
-  </button>
+  <main class="app">
+    <h1>📝 我的待办清单</h1>
+    <p class="subtitle">每天进步一点点 ✨</p>
+
+    <div class="add-row">
+      <input id="taskInput"
+             placeholder="今天准备做什么？"
+             maxlength="100">
+      <button class="add" id="addBtn">添加</button>
+    </div>
+
+    <div id="taskList"></div>
+
+    <div class="stats" id="stats"></div>
+  </main>
+
+  <script>
+    const key = "my-todo-v1";
+    let tasks = [];
+
+    try {
+      tasks = JSON.parse(localStorage.getItem(key)) || [];
+      if (!Array.isArray(tasks)) tasks = [];
+    } catch (e) {
+      tasks = [];
+    }
+
+    const input = document.getElementById("taskInput");
+    const list = document.getElementById("taskList");
+    const stats = document.getElementById("stats");
+
+    function save() {
+      localStorage.setItem(key, JSON.stringify(tasks));
+    }
+
+    function render() {
+      list.replaceChildren();
+
+      if (tasks.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "还没有任务，添加第一条吧！";
+        list.appendChild(empty);
+      }
+
+      tasks.forEach(task => {
+        const row = document.createElement("div");
+        row.className = "task";
+
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = task.done;
+        check.onchange = () => {
+          task.done = check.checked;
+          save();
+          render();
+        };
+
+        const text = document.createElement("span");
+        text.textContent = task.name;
+        if (task.done) text.className = "done";
+
+        const del = document.createElement("button");
+        del.className = "delete";
+        del.textContent = "删除";
+        del.onclick = () => {
+          tasks = tasks.filter(t => t.id !== task.id);
+          save();
+          render();
+        };
+
+        row.append(check, text, del);
+        list.appendChild(row);
+      });
+
+      const completed = tasks.filter(t => t.done).length;
+      stats.textContent =
+        `已完成 ${completed} / ${tasks.length} 项任务`;
+    }
+
+    function addTask() {
+      const name = input.value.trim();
+      if (!name) return;
+
+      tasks.push({
+        id: Date.now() + Math.random(),
+        name: name,
+        done: false
+      });
+
+      input.value = "";
+      save();
+      render();
+      input.focus();
+    }
+
+    document.getElementById("addBtn").onclick = addTask;
+
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") addTask();
+    });
+
+    render();
+  </script>
 </body>
 </html>
-<!-- 重新触发 GitHub Pages 发布 -->
+  
