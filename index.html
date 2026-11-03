@@ -1,137 +1,436 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>我的待办清单</title>
+  <title>我的待办清单 V2.0</title>
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --bg: #edf3ff;
+      --card: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(145, 167, 211, 0.28);
+      --primary: #3d7af5;
+      --primary-dark: #205fe0;
+      --text: #263044;
+      --muted: #7d8aa4;
+      --line: #edf0f5;
+      --high: #ff5c5c;
+      --high-soft: #fff1f1;
+      --medium: #ffb649;
+      --medium-soft: #fff6e8;
+      --low: #3ec28d;
+      --low-soft: #ebfff6;
+      --danger: #e04b4b;
+      --danger-soft: #fff0f0;
+      --shadow: 0 14px 36px rgba(27, 66, 127, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #eef5ff 0%, #edf3ff 100%);
+      color: var(--text);
+    }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont,
-                   "Microsoft YaHei", sans-serif;
-      background: #edf3ff;
-      margin: 0;
-      padding: 45px 16px;
-      color: #263044;
+      padding: 28px 14px 40px;
     }
 
     .app {
-      max-width: 520px;
-      margin: auto;
-      background: white;
-      padding: 28px;
-      border-radius: 22px;
-      box-shadow: 0 10px 35px #193b7015;
+      max-width: 620px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 22px 18px 18px;
+      backdrop-filter: blur(8px);
     }
 
-    h1 { margin: 0 0 8px; }
-    .subtitle { color: #8490a4; }
+    .header {
+      margin-bottom: 18px;
+    }
 
-    .add-row {
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      letter-spacing: 0.04em;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .task-form {
+      display: grid;
+      gap: 12px;
+      margin: 20px 0 18px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .field {
       display: flex;
+      flex-direction: column;
       gap: 8px;
-      margin: 28px 0 20px;
+      text-align: left;
     }
 
-    input {
-      flex: 1;
-      min-width: 0;
-      padding: 13px;
-      border: 1px solid #dce3ef;
-      border-radius: 10px;
-      font-size: 15px;
+    .field span {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--muted);
+      padding-left: 2px;
     }
 
+    input,
+    select,
     button {
-      border: none;
-      border-radius: 10px;
-      padding: 11px 16px;
-      cursor: pointer;
+      font: inherit;
     }
 
-    .add {
-      background: #3979f6;
+    input,
+    select {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid #dfe7f6;
+      background: white;
+      border-radius: 12px;
+      padding: 12px 13px;
+      font-size: 0.98rem;
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(61, 122, 245, 0.12);
+    }
+
+    .add-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: white;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(61, 122, 245, 0.28);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .add-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(61, 122, 245, 0.3);
+    }
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 8px;
     }
 
     .task {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
       gap: 12px;
-      padding: 15px 3px;
-      border-bottom: 1px solid #edf0f5;
+      background: #fbfcff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 12px 12px 10px;
+      transition: border-color 0.2s ease, transform 0.15s ease;
     }
 
-    .task input { flex: none; }
-
-    .task span {
-      flex: 1;
-      overflow-wrap: anywhere;
+    .task:hover {
+      border-color: #d7e3ff;
+      transform: translateY(-1px);
     }
 
-    .done {
+    .task.done {
+      background: #f7f9fc;
+    }
+
+    .task-check {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .task-main {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .task-title {
+      font-size: 1rem;
+      font-weight: 600;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .task.done .task-title {
       text-decoration: line-through;
-      color: #a5adbb;
+      color: #a7b3c8;
     }
 
-    .delete {
-      background: #fff0f0;
-      color: #e04b4b;
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-height: 20px;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .priority-high {
+      background: var(--high-soft);
+      color: var(--high);
+    }
+
+    .priority-medium {
+      background: var(--medium-soft);
+      color: #d18d13;
+    }
+
+    .priority-low {
+      background: var(--low-soft);
+      color: var(--low);
+    }
+
+    .due-date {
+      background: #eef4ff;
+      color: #4c6ebd;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .due-date.empty {
+      display: none;
+    }
+
+    .delete-btn {
+      border: none;
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .delete-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
     }
 
     .stats {
-      margin-top: 24px;
-      color: #617089;
-      font-size: 14px;
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 600;
     }
 
     .empty {
-      color: #98a3b6;
+      margin: 0;
+      border: 1px dashed #d7e1f0;
+      background: #f8fbff;
+      color: var(--muted);
+      border-radius: 16px;
       text-align: center;
-      padding: 20px;
+      padding: 26px 12px;
+      font-size: 0.96rem;
+    }
+
+    @media (max-width: 540px) {
+      body {
+        padding: 18px 10px 30px;
+      }
+
+      .app {
+        padding: 16px 12px 14px;
+        border-radius: 20px;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+
+      .task {
+        grid-template-columns: auto 1fr;
+      }
+
+      .delete-btn {
+        grid-column: 2;
+        justify-self: end;
+        margin-top: 2px;
+      }
     }
   </style>
 </head>
 
 <body>
   <main class="app">
-    <h1>📝 我的待办清单</h1>
-    <p class="subtitle">每天进步一点点 ✨</p>
+    <header class="header">
+      <h1>📝 我的待办清单</h1>
+      <p class="subtitle">每天进步一点点 ✨</p>
+    </header>
 
-    <div class="add-row">
-      <input id="taskInput"
-             placeholder="今天准备做什么？"
-             maxlength="100">
-      <button class="add" id="addBtn">添加</button>
-    </div>
+    <form id="taskForm" class="task-form">
+      <div class="field-row">
+        <label class="field">
+          <span>任务内容</span>
+          <input id="taskInput" type="text" maxlength="100" placeholder="今天准备做什么？" autocomplete="off">
+        </label>
 
-    <div id="taskList"></div>
+        <label class="field">
+          <span>截止日期</span>
+          <input id="dueDateInput" type="date">
+        </label>
 
-    <div class="stats" id="stats"></div>
+        <label class="field">
+          <span>优先级</span>
+          <select id="priorityInput">
+            <option value="high">高</option>
+            <option value="medium" selected>中</option>
+            <option value="low">低</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="addBtn" class="add-btn" type="submit">添加任务</button>
+    </form>
+
+    <div id="taskList" class="task-list"></div>
+    <div id="stats" class="stats"></div>
   </main>
 
   <script>
-    const key = "my-todo-v1";
+    const STORAGE_KEY = "my-todo-v2";
+    const LEGACY_KEY = "my-todo-v1";
+    const PRIORITY_MAP = {
+      high: { label: "高", className: "priority-high" },
+      medium: { label: "中", className: "priority-medium" },
+      low: { label: "低", className: "priority-low" }
+    };
+
     let tasks = [];
 
-    try {
-      tasks = JSON.parse(localStorage.getItem(key)) || [];
-      if (!Array.isArray(tasks)) tasks = [];
-    } catch (e) {
-      tasks = [];
+    function safeReadJSON(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
     }
 
-    const input = document.getElementById("taskInput");
-    const list = document.getElementById("taskList");
-    const stats = document.getElementById("stats");
+    function normalizeTask(task, fallbackId) {
+      const safeText = typeof task?.name === "string" ? task.name.trim() : "";
+      const priority = PRIORITY_MAP[task?.priority] ? task.priority : "medium";
+      const dueDate = typeof task?.dueDate === "string" ? task.dueDate : "";
+
+      return {
+        id: task?.id || fallbackId || `${Date.now()}-${Math.random()}`,
+        name: safeText,
+        done: Boolean(task?.done),
+        dueDate: dueDate,
+        priority: priority,
+        createdAt: Number(task?.createdAt) || Date.now()
+      };
+    }
+
+    function loadTasks() {
+      const merged = [];
+      const seenIds = new Set();
+      const arrays = [safeReadJSON(STORAGE_KEY), safeReadJSON(LEGACY_KEY)];
+
+      arrays.forEach((list) => {
+        list.forEach((task, index) => {
+          const normalized = normalizeTask(task, `${Date.now()}-${index}`);
+          if (!normalized.name) return;
+          if (!seenIds.has(normalized.id)) {
+            seenIds.add(normalized.id);
+            merged.push(normalized);
+          }
+        });
+      });
+
+      tasks = merged;
+      save();
+    }
 
     function save() {
-      localStorage.setItem(key, JSON.stringify(tasks));
+      try {
+        const payload = JSON.stringify(tasks);
+        localStorage.setItem(STORAGE_KEY, payload);
+        localStorage.setItem(LEGACY_KEY, payload);
+      } catch (error) {
+        console.warn("本地存储保存失败：", error);
+      }
+    }
+
+    function getSortedTasks() {
+      return [...tasks].sort((a, b) => {
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+
+        if (a.done !== b.done) {
+          return Number(a.done) - Number(b.done);
+        }
+
+        const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+
+        const dateA = a.dueDate ? new Date(`${a.dueDate}T00:00:00`).getTime() : Number.MAX_SAFE_INTEGER;
+        const dateB = b.dueDate ? new Date(`${b.dueDate}T00:00:00`).getTime() : Number.MAX_SAFE_INTEGER;
+        if (dateA !== dateB) return dateA - dateB;
+
+        return Number(a.createdAt) - Number(b.createdAt);
+      });
+    }
+
+    function updateStats() {
+      const completed = tasks.filter((task) => task.done).length;
+      document.getElementById("stats").textContent = `已完成 ${completed} / ${tasks.length} 项任务`;
     }
 
     function render() {
+      const list = document.getElementById("taskList");
       list.replaceChildren();
 
       if (tasks.length === 0) {
@@ -139,67 +438,108 @@
         empty.className = "empty";
         empty.textContent = "还没有任务，添加第一条吧！";
         list.appendChild(empty);
+      } else {
+        const sortedTasks = getSortedTasks();
+
+        sortedTasks.forEach((task) => {
+          const row = document.createElement("div");
+          row.className = `task ${task.done ? "done" : ""}`;
+
+          const check = document.createElement("input");
+          check.type = "checkbox";
+          check.checked = task.done;
+          check.className = "task-check";
+          check.setAttribute("aria-label", `标记任务为${task.done ? "未完成" : "已完成"}`);
+          check.addEventListener("change", () => {
+            task.done = check.checked;
+            save();
+            render();
+          });
+
+          const main = document.createElement("div");
+          main.className = "task-main";
+
+          const title = document.createElement("div");
+          title.className = "task-title";
+          title.textContent = task.name;
+
+          const meta = document.createElement("div");
+          meta.className = "task-meta";
+
+          const priority = document.createElement("span");
+          const priorityInfo = PRIORITY_MAP[task.priority] || PRIORITY_MAP.medium;
+          priority.className = `meta-pill ${priorityInfo.className}`;
+          priority.textContent = `优先级：${priorityInfo.label}`;
+
+          const dueDate = document.createElement("span");
+          dueDate.className = `due-date ${task.dueDate ? "" : "empty"}`;
+          dueDate.textContent = task.dueDate ? `截止：${task.dueDate}` : "";
+
+          meta.append(priority, dueDate);
+          main.append(title, meta);
+
+          const del = document.createElement("button");
+          del.type = "button";
+          del.className = "delete-btn";
+          del.textContent = "删除";
+          del.addEventListener("click", () => {
+            tasks = tasks.filter((item) => item.id !== task.id);
+            save();
+            render();
+          });
+
+          row.append(check, main, del);
+          list.appendChild(row);
+        });
       }
 
-      tasks.forEach(task => {
-        const row = document.createElement("div");
-        row.className = "task";
-
-        const check = document.createElement("input");
-        check.type = "checkbox";
-        check.checked = task.done;
-        check.onchange = () => {
-          task.done = check.checked;
-          save();
-          render();
-        };
-
-        const text = document.createElement("span");
-        text.textContent = task.name;
-        if (task.done) text.className = "done";
-
-        const del = document.createElement("button");
-        del.className = "delete";
-        del.textContent = "删除";
-        del.onclick = () => {
-          tasks = tasks.filter(t => t.id !== task.id);
-          save();
-          render();
-        };
-
-        row.append(check, text, del);
-        list.appendChild(row);
-      });
-
-      const completed = tasks.filter(t => t.done).length;
-      stats.textContent =
-        `已完成 ${completed} / ${tasks.length} 项任务`;
+      updateStats();
     }
 
     function addTask() {
+      const input = document.getElementById("taskInput");
+      const dueDateInput = document.getElementById("dueDateInput");
+      const priorityInput = document.getElementById("priorityInput");
+
       const name = input.value.trim();
-      if (!name) return;
+      if (!name) {
+        input.focus();
+        return;
+      }
 
       tasks.push({
-        id: Date.now() + Math.random(),
+        id: `${Date.now()}-${Math.random()}`,
         name: name,
-        done: false
+        done: false,
+        dueDate: dueDateInput.value || "",
+        priority: PRIORITY_MAP[priorityInput.value] ? priorityInput.value : "medium",
+        createdAt: Date.now()
       });
 
       input.value = "";
+      dueDateInput.value = "";
+      priorityInput.value = "medium";
       save();
       render();
       input.focus();
     }
 
-    document.getElementById("addBtn").onclick = addTask;
+    function init() {
+      try {
+        loadTasks();
+      } catch (error) {
+        tasks = [];
+      }
 
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter") addTask();
-    });
+      document.getElementById("taskForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        addTask();
+      });
 
-    render();
+      render();
+    }
+
+    init();
   </script>
 </body>
-  </html>
-  
+</html>
